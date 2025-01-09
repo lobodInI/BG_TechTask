@@ -1,4 +1,10 @@
-from flask import Blueprint, session, request, jsonify, Response
+from flask import Blueprint, request, jsonify, Response
+from flask_jwt_extended import (
+    create_access_token,
+    create_refresh_token,
+    jwt_required,
+    get_jwt_identity
+)
 from werkzeug.security import generate_password_hash, check_password_hash
 
 from models import db, User
@@ -14,6 +20,9 @@ def signup() -> tuple[Response, int]:
     last_name = data.get("last_name")
     email = data.get("email")
     password = data.get("password")
+
+    if not all([first_name, last_name, email, password]):
+        return jsonify({"message": "All fields must be filled in!"}), 400
 
     user_db = User.query.filter_by(email=email).first()
 
@@ -48,4 +57,20 @@ def login() -> tuple[Response, int]:
     if not check_password_hash(user_db.password, password):
         return jsonify({"message": "Password does not match!"}), 400
 
-    return jsonify({"message": "Login successful!"}), 200
+    return jsonify(
+        {
+            "message": "Login successful!",
+            "access": create_access_token(identity=str(user_db.id)),
+            "refresh": create_refresh_token(identity=str(user_db.id)),
+        }
+    ), 200
+
+
+@auth_route.route("/auth/me/", methods=["GET"])
+@jwt_required()
+def info_about_me():
+    current_user = User.query.get(get_jwt_identity())
+
+    return jsonify(
+        {"message": f"Info about me: {current_user.to_json()}"}
+    )

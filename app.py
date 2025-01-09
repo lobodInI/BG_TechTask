@@ -1,5 +1,6 @@
 from flask import Flask
 from flask_migrate import Migrate
+from flask_jwt_extended import JWTManager
 
 from config import Configurator
 from models import db
@@ -10,6 +11,8 @@ def create_app():
     app = Flask(__name__, static_folder="static")
 
     Configurator.init_flask_config(app=app)
+
+    jwt = JWTManager(app)
 
     with app.app_context():
         db.init_app(app)
