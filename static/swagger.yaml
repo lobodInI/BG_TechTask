@@ -5,10 +5,11 @@ info:
 
 servers:
   - url: http://0.0.0.0:5000/
+  - url: http://127.0.0.1:5000/
 
 paths:
 
-  /signup:
+  /auth/register/:
     post:
       summary: User signup
       description: Registration user with first_name, last_name, email and password
@@ -17,13 +18,13 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/signup'
+              $ref: '#/components/schemas/register'
           application/xml:
             schema:
-              $ref: '#/components/schemas/signup'
+              $ref: '#/components/schemas/register'
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/signup'
+              $ref: '#/components/schemas/register'
         required: true
       responses:
         '200':
@@ -33,7 +34,7 @@ paths:
         '500':
           description: Server error
 
-  /login:
+  /auth/login/:
     post:
       summary: User login
       description: Log in with email and password
@@ -74,7 +75,7 @@ components:
           example: PASSword0987654321!
 
 
-    signup:
+    register:
       type: object
       properties:
         first_name:
