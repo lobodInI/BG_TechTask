@@ -50,7 +50,10 @@ class TradingStrategy(db.Model):
     owner: Mapped[User] = relationship(back_populates="strategies")
 
     def to_json(self) -> dict:
-        return {column.key: getattr(self, column.key) for column in inspect(self).mapper.columns}
+        result = {column.key: getattr(self, column.key) for column in inspect(self).mapper.columns}
+        result["status"] = self.status.value
+
+        return result
 
     def __repr__(self) -> str:
         return f"Trading Strategy: {self.name}"
