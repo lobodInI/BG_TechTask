@@ -1,3 +1,5 @@
+import datetime
+
 from environs import Env
 from flask import Flask
 
@@ -19,3 +21,10 @@ class Configurator:
 
         app.config["SQLALCHEMY_DATABASE_URI"] = (f"{sql_driver}://{db_user}:{db_pass}"
                                                  f"@{db_host}:{db_port}/{db_name}")
+
+        app.config["JWT_ACCESS_TOKEN_EXPIRES"] = datetime.timedelta(
+            minutes=int(env("JWT_ACCESS_TOKEN_EXPIRES"))
+        )
+        app.config["JWT_REFRESH_TOKEN_EXPIRES"] = datetime.timedelta(
+            minutes=int(env("JWT_REFRESH_TOKEN_EXPIRES"))
+        )
