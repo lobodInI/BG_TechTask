@@ -20,6 +20,24 @@ def get_all_strategies() -> tuple[Response, int]:
     ), 200
 
 
+@strategies_route.route("/strategies/<int:id>/", methods=["GET"])
+@jwt_required()
+def get_strategy(id: int) -> tuple[Response, int]:
+    """
+    Information about a specific strategy.
+    :return: Response
+    """
+    current_strategy = TradingStrategy.query.filter_by(
+        id=id,
+        owner_id=get_jwt_identity(),
+    ).first()
+
+    if not current_strategy:
+        return jsonify({"message": f"Strategy by ID: {id} not found!"}), 404
+
+    return jsonify({"strategy": current_strategy.to_json()}), 200
+
+
 @strategies_route.route("/strategies/", methods=["POST"])
 @jwt_required()
 def create_strategies() -> tuple[Response, int]:
@@ -87,4 +105,28 @@ def update_strategy(id: int) -> tuple[Response, int]:
             "message": "Strategy updated successfully!",
             "strategy": current_strategy.to_json(),
         }
+    ), 200
+
+
+@strategies_route.route("/strategies/<int:id>/", methods=["DELETE"])
+@jwt_required()
+def delete_strategy(id: int) -> tuple[Response, int]:
+    """
+    Delete current strategy.
+    :param id: Strategy identifier
+    :return: Response
+    """
+    current_strategy = TradingStrategy.query.filter_by(
+        id=id,
+        owner_id=get_jwt_identity(),
+    ).first()
+
+    if not current_strategy:
+        return jsonify({"message": f"Strategy by ID: {id} not found!"}), 404
+
+    db.session.delete(current_strategy)
+    db.session.commit()
+
+    return jsonify(
+        {"message": "Strategy deleted successfully!"},
     ), 200
