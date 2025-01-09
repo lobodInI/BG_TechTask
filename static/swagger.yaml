@@ -61,6 +61,20 @@ paths:
         '500':
           description: Server error
 
+  /auth/refresh_token/:
+    get:
+      summary: New JWT access token
+      description: Get new JWT access token by refresh
+      responses:
+        '200':
+          description: Successful
+        '422':
+          description: Only non-refresh tokens are allowed
+        '500':
+          description: Server error
+      security:
+        - bearerAuth: [ ]
+
   /auth/me/:
     get:
       summary: User info
