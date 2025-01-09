@@ -66,6 +66,19 @@ def login() -> tuple[Response, int]:
     ), 200
 
 
+@auth_route.route("/auth/refresh_token/", methods=["GET"])
+@jwt_required(refresh=True)
+def get_new_access_token() -> tuple[Response, int]:
+    """
+    Getting new access token by using refresh
+    :return: Response
+    """
+    current_user = User.query.get(get_jwt_identity())
+    new_access_token = create_access_token(identity=str(current_user.id))
+
+    return jsonify({"access token": new_access_token}), 200
+
+
 @auth_route.route("/auth/me/", methods=["GET"])
 @jwt_required()
 def info_about_me():
@@ -73,4 +86,4 @@ def info_about_me():
 
     return jsonify(
         {"message": f"Info about me: {current_user.to_json()}"}
-    )
+    ), 200
