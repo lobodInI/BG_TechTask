@@ -1,0 +1,100 @@
+openapi: 3.0.0
+info:
+  title: Swagger Trading Manager - OpenAPI 3.0
+  version: 1.0.0
+
+servers:
+  - url: http://0.0.0.0:5000/
+
+paths:
+
+  /signup:
+    post:
+      summary: User signup
+      description: Registration user with first_name, last_name, email and password
+      requestBody:
+        description: Signup credentials
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/signup'
+          application/xml:
+            schema:
+              $ref: '#/components/schemas/signup'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/signup'
+        required: true
+      responses:
+        '200':
+          description: Registration successful
+        '400':
+          description: Invalid credential
+        '500':
+          description: Server error
+
+  /login:
+    post:
+      summary: User login
+      description: Log in with email and password
+      requestBody:
+        description: Login credentials
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/login'
+          application/xml:
+            schema:
+              $ref: '#/components/schemas/login'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/login'
+        required: true
+      responses:
+        '200':
+          description: Login successful
+        '400':
+          description: Invalid credential
+        '404':
+          description: User not found
+        '500':
+          description: Server error
+
+
+components:
+  schemas:
+    login:
+      type: object
+      properties:
+        email:
+          type: string
+          example: user123@mail.com
+        password:
+          type: string
+          example: PASSword0987654321!
+
+
+    signup:
+      type: object
+      properties:
+        first_name:
+          type: string
+          example: John
+        last_name:
+          type: string
+          example: Silver
+        email:
+          type: string
+          example: user123@mail.com
+        password:
+          type: string
+          example: PASSword0987654321!
+
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: |
+        Defines JWT-based authentication.
