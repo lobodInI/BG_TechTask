@@ -97,17 +97,46 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/new_strategy'
+              $ref: '#/components/schemas/strategy_data'
         required: true
       responses:
         '200':
-          description: Strategies info
+          description: Successful
         '400':
           description: Not Authorization
         '500':
           description: Server error
       security:
         - bearerAuth: [ ]
+
+  /strategies/{id}/:
+    put:
+      summary: Update strategy
+      description: Update strategy by provide data
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+          description: Strategy identifier
+      requestBody:
+        description: Strategy parameters
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/strategy_data'
+        required: true
+      responses:
+        '200':
+          description: Successful
+        '400':
+          description: Not Authorization
+        '500':
+          description: Server error
+      security:
+        - bearerAuth: [ ]
+
 
 components:
   schemas:
@@ -138,7 +167,7 @@ components:
           type: string
           example: PASSword0987654321!
 
-    new_strategy:
+    strategy_data:
       type: object
       properties:
         name:
