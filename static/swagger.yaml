@@ -75,6 +75,40 @@ paths:
       security:
         - bearerAuth: [ ]
 
+  /strategies/:
+    get:
+      summary: All strategies current user
+      description: All explicit strategies of the current user
+      responses:
+        '200':
+          description: Strategies info
+        '400':
+          description: Not Authorization
+        '500':
+          description: Server error
+      security:
+        - bearerAuth: [ ]
+
+    post:
+      summary: Added new strategy
+      description: Create new strategy with detail info
+      requestBody:
+        description: Strategy parameters
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/new_strategy'
+        required: true
+      responses:
+        '200':
+          description: Strategies info
+        '400':
+          description: Not Authorization
+        '500':
+          description: Server error
+      security:
+        - bearerAuth: [ ]
+
 components:
   schemas:
     login:
@@ -103,6 +137,28 @@ components:
         password:
           type: string
           example: PASSword0987654321!
+
+    new_strategy:
+      type: object
+      properties:
+        name:
+          type: string
+          example: Strategy to SP500
+        description:
+          type: string
+          example: S&P 500 trading strategies have a variety of approaches, including momentum reversal, mean reversion, breakout, arbitrage, and pair trading.
+        asset_type:
+          type: string
+          example: stock
+        buy_condition:
+          type: json
+          example: {"indicator": "momentum", "threshold": 2.5}
+        sell_condition:
+          type: json
+          example: { "indicator": "momentum", "threshold": -2.5 }
+        status:
+          type: string
+          example: active
 
 
   securitySchemes:
