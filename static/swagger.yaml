@@ -4,8 +4,8 @@ info:
   version: 1.0.0
 
 servers:
-  - url: http://0.0.0.0:5000/
   - url: http://127.0.0.1:5000/
+  - url: http://0.0.0.0:5000/
 
 paths:
 
@@ -61,6 +61,19 @@ paths:
         '500':
           description: Server error
 
+  /auth/me/:
+    get:
+      summary: User info
+      description: Info about current auth user
+      responses:
+        '200':
+          description: User info
+        '400':
+          description: Not Authorization
+        '500':
+          description: Server error
+      security:
+        - bearerAuth: [ ]
 
 components:
   schemas:
