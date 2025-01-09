@@ -2,6 +2,7 @@ import enum
 
 from sqlalchemy import String, JSON, Enum
 from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.inspection import inspect
 from flask_sqlalchemy import SQLAlchemy
 
 db = SQLAlchemy()
@@ -21,6 +22,14 @@ class User(db.Model):
     email: Mapped[str] = mapped_column(String(30), nullable=False, unique=True, index=True)
     password: Mapped[str] = mapped_column(String(256), nullable=False)
 
+    def to_json(self) -> dict[str, int | str]:
+        return {
+            "id": self.id,
+            "first_name": self.first_name,
+            "last_name": self.last_name,
+            "email": self.email,
+        }
+
     def __repr__(self) -> str:
         return f"User: {self.first_name} {self.last_name}"
 
@@ -35,6 +44,9 @@ class TradingStrategy(db.Model):
     buy_condition: Mapped[JSON] = mapped_column(JSON, nullable=False)
     sell_condition: Mapped[JSON] = mapped_column(JSON, nullable=False)
     status: Mapped[TradingStatus] = mapped_column(Enum(TradingStatus), nullable=False, default=TradingStatus.active)
+
+    def to_json(self) -> dict:
+        return {column.key: getattr(self, column.key) for column in inspect(self).mapper.columns}
 
     def __repr__(self) -> str:
         return f"Trading Strategy: {self.name}"
