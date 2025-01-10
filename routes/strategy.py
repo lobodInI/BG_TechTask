@@ -17,7 +17,7 @@ def get_all_strategies() -> tuple[Response, int]:
     all_user_strategies = TradingStrategy.query.filter_by(owner_id=get_jwt_identity())
 
     return jsonify(
-        {"strategies": [strategy.to_json() for strategy in all_user_strategies]},
+        {"strategies": [strategy.to_dict() for strategy in all_user_strategies]},
     ), 200
 
 
@@ -36,7 +36,7 @@ def get_strategy(id: int) -> tuple[Response, int]:
     if not current_strategy:
         return jsonify({"message": f"Strategy by ID: {id} not found!"}), 404
 
-    return jsonify({"strategy": current_strategy.to_json()}), 200
+    return jsonify({"strategy": current_strategy.to_dict()}), 200
 
 
 @strategies_route.route("/strategies/", methods=["POST"])
@@ -114,7 +114,7 @@ def update_strategy(id: int) -> tuple[Response, int]:
     return jsonify(
         {
             "message": "Strategy updated successfully!",
-            "strategy": current_strategy.to_json(),
+            "strategy": current_strategy.to_dict(),
         }
     ), 200
 

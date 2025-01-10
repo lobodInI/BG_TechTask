@@ -23,7 +23,7 @@ class User(db.Model):
     password: Mapped[str] = mapped_column(String(256), nullable=False)
     strategies = relationship("TradingStrategy", back_populates="owner")
 
-    def to_json(self) -> dict[str, int | str]:
+    def to_dict(self) -> dict[str, int | str]:
         return {
             "id": self.id,
             "first_name": self.first_name,
@@ -49,7 +49,7 @@ class TradingStrategy(db.Model):
     owner_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
     owner: Mapped[User] = relationship(back_populates="strategies")
 
-    def to_json(self) -> dict:
+    def to_dict(self) -> dict:
         result = {column.key: getattr(self, column.key) for column in inspect(self).mapper.columns}
         result["status"] = self.status.value
 

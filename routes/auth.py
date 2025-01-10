@@ -85,5 +85,5 @@ def info_about_me():
     current_user = User.query.get(get_jwt_identity())
 
     return jsonify(
-        {"message": f"Info about me: {current_user.to_json()}"}
+        {"message": f"Info about me: {current_user.to_dict()}"}
     ), 200
