@@ -1,8 +1,11 @@
+import json
+
 from flask import Blueprint, request, jsonify, Response
 from flask_jwt_extended import jwt_required, get_jwt_identity
 
 from models import db, TradingStrategy
 from utils.messaging import send_message_to_rabbitmq
+from utils.redis_client import redis_client
 
 
 strategies_route = Blueprint("strategies", __name__)
@@ -14,10 +17,20 @@ def get_all_strategies() -> tuple[Response, int]:
     List of all strategies for current user.
     :return: Response with list strategies
     """
-    all_user_strategies = TradingStrategy.query.filter_by(owner_id=get_jwt_identity())
+    cache_key = f"user_{get_jwt_identity()}"
+    # check data in cache
+    cached_strategies = redis_client.get(cache_key)
+
+    if cached_strategies:
+        all_user_strategies = json.loads(cached_strategies)
+    else:
+        all_user_strategies = TradingStrategy.query.filter_by(owner_id=get_jwt_identity())
+        all_user_strategies = [strategy.to_dict() for strategy in all_user_strategies]
+        # save strategies sata in cache
+        redis_client.set(cache_key, json.dumps(all_user_strategies))
 
     return jsonify(
-        {"strategies": [strategy.to_dict() for strategy in all_user_strategies]},
+        {"strategies": all_user_strategies},
     ), 200
 
 
@@ -90,6 +103,8 @@ def update_strategy(id: int) -> tuple[Response, int]:
     :param id: Strategy identifier
     :return: Response
     """
+    cache_key = f"user_{get_jwt_identity()}"
+
     current_strategy = TradingStrategy.query.filter_by(
         id=id,
         owner_id=get_jwt_identity(),
@@ -111,6 +126,9 @@ def update_strategy(id: int) -> tuple[Response, int]:
         message=f"User with ID: {get_jwt_identity()} updated strategy: {current_strategy.name}"
     )
 
+    # deleting list strategies after updating
+    redis_client.delete(cache_key)
+
     return jsonify(
         {
             "message": "Strategy updated successfully!",
@@ -127,6 +145,8 @@ def delete_strategy(id: int) -> tuple[Response, int]:
     :param id: Strategy identifier
     :return: Response
     """
+    cache_key = f"user_{get_jwt_identity()}"
+
     current_strategy = TradingStrategy.query.filter_by(
         id=id,
         owner_id=get_jwt_identity(),
@@ -137,6 +157,9 @@ def delete_strategy(id: int) -> tuple[Response, int]:
 
     db.session.delete(current_strategy)
     db.session.commit()
+
+    # delete list strategies after deleting specific strategies
+    redis_client.delete(cache_key)
 
     return jsonify(
         {"message": "Strategy deleted successfully!"},
