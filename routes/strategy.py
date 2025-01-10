@@ -2,6 +2,7 @@ from flask import Blueprint, request, jsonify, Response
 from flask_jwt_extended import jwt_required, get_jwt_identity
 
 from models import db, TradingStrategy
+from utils.messaging import send_message_to_rabbitmq
 
 
 strategies_route = Blueprint("strategies", __name__)
@@ -73,6 +74,11 @@ def create_strategies() -> tuple[Response, int]:
     db.session.add(new_strategy)
     db.session.commit()
 
+    send_message_to_rabbitmq(
+        queue_name="strategy_queue",
+        message=f"User with ID: {get_jwt_identity()} created strategy: {name}."
+    )
+
     return jsonify({"message": "New strategy added!"}), 201
 
 
@@ -99,6 +105,11 @@ def update_strategy(id: int) -> tuple[Response, int]:
             setattr(current_strategy, field, data_to_update[field])
 
     db.session.commit()
+
+    send_message_to_rabbitmq(
+        queue_name="strategy_queue",
+        message=f"User with ID: {get_jwt_identity()} updated strategy: {current_strategy.name}"
+    )
 
     return jsonify(
         {
