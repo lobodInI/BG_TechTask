@@ -14,6 +14,10 @@ auth_route = Blueprint("auth", __name__)
 
 @auth_route.route("/auth/register/", methods=["POST"])
 def signup() -> tuple[Response, int]:
+    """
+    Registration new client.
+    :return: Response with message
+    """
     data = request.get_json()
 
     first_name = data.get("first_name")
@@ -44,6 +48,10 @@ def signup() -> tuple[Response, int]:
 
 @auth_route.route("/auth/login/", methods=["POST"])
 def login() -> tuple[Response, int]:
+    """
+    Login client.
+    :return: Response with message.
+    """
     data = request.get_json()
 
     email = data.get("email")
@@ -71,7 +79,7 @@ def login() -> tuple[Response, int]:
 def get_new_access_token() -> tuple[Response, int]:
     """
     Getting new access token by using refresh
-    :return: Response
+    :return: Response with new access JWT token
     """
     current_user = User.query.get(get_jwt_identity())
     new_access_token = create_access_token(identity=str(current_user.id))
@@ -82,6 +90,10 @@ def get_new_access_token() -> tuple[Response, int]:
 @auth_route.route("/auth/me/", methods=["GET"])
 @jwt_required()
 def info_about_me():
+    """
+    Info about current authenticate user.
+    :return: Response with user data.
+    """
     current_user = User.query.get(get_jwt_identity())
 
     return jsonify(
