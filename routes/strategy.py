@@ -1,11 +1,14 @@
 import json
 
+from typing import Any
+
 from flask import Blueprint, request, jsonify, Response
 from flask_jwt_extended import jwt_required, get_jwt_identity
 
 from models import db, TradingStrategy
 from utils.messaging import send_message_to_rabbitmq
 from utils.redis_client import redis_client
+from utils.profit_calculation import profit_calculation
 
 
 strategies_route = Blueprint("strategies", __name__)
@@ -39,7 +42,7 @@ def get_all_strategies() -> tuple[Response, int]:
 def get_strategy(id: int) -> tuple[Response, int]:
     """
     Information about a specific strategy.
-    :return: Response
+    :return: Response with data strategy.
     """
     current_strategy = TradingStrategy.query.filter_by(
         id=id,
@@ -57,7 +60,7 @@ def get_strategy(id: int) -> tuple[Response, int]:
 def create_strategies() -> tuple[Response, int]:
     """
     Create new trading strategy.
-    :return: Response
+    :return: Response with message.
     """
     data = request.get_json()
 
@@ -101,7 +104,7 @@ def update_strategy(id: int) -> tuple[Response, int]:
     """
     Update info about current strategy.
     :param id: Strategy identifier
-    :return: Response
+    :return: Response with message and strategy data.
     """
     cache_key = f"user_{get_jwt_identity()}"
 
@@ -143,7 +146,7 @@ def delete_strategy(id: int) -> tuple[Response, int]:
     """
     Delete current strategy.
     :param id: Strategy identifier
-    :return: Response
+    :return: Response with message.
     """
     cache_key = f"user_{get_jwt_identity()}"
 
@@ -164,3 +167,29 @@ def delete_strategy(id: int) -> tuple[Response, int]:
     return jsonify(
         {"message": "Strategy deleted successfully!"},
     ), 200
+
+
+@strategies_route.route("/strategies/<int:id>/simulate/", methods=["POST"])
+@jwt_required()
+def strategies_simulate(id: int)-> tuple[Response, int] | tuple[dict[str, Any], int]:
+    """
+    Simulation of trading according to the chosen strategy.
+    :param id: Strategy identifier.
+    :return: profit calculation data
+    """
+    current_strategy = TradingStrategy.query.filter_by(
+        id=id,
+        owner_id=get_jwt_identity(),
+    ).first()
+
+    if not current_strategy:
+        return jsonify({"message": f"Strategy by ID: {id} not found!"}), 404
+
+    historical_data = request.get_json()
+
+    result_simulate = profit_calculation(
+        strategy=current_strategy,
+        historical_data=historical_data,
+    )
+
+    return jsonify(result_simulate), 200
