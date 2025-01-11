@@ -197,6 +197,67 @@ paths:
       security:
         - bearerAuth: [ ]
 
+  /strategies/{id}/simulate/:
+    post:
+      summary: Simulate strategy with provided market data
+      description: Accepts a list of JSON objects containing market data for simulation.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The ID of the strategy to simulate.
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: object
+                properties:
+                  date:
+                    type: string
+                    format: date
+                  open:
+                    type: number
+                    format: float
+                  close:
+                    type: number
+                    format: float
+                  high:
+                    type: number
+                    format: float
+                  low:
+                    type: number
+                    format: float
+                  volume:
+                    type: integer
+              example:
+                - date: "2024-06-01"
+                  open: 100.5
+                  close: 102.3
+                  high: 103.0
+                  low: 99.8
+                  volume: 150000
+                - date: "2024-06-02"
+                  open: 102.3
+                  close: 104.7
+                  high: 105.5
+                  low: 101.2
+                  volume: 180000
+      responses:
+        '200':
+          description: Successful simulate
+        '400':
+          description: Not Authorization
+        '404':
+          description: Not Found
+        '500':
+          description: Server error
+      security:
+        - bearerAuth: [ ]
 
 components:
   schemas:
